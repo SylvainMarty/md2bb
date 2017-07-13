@@ -3,8 +3,11 @@ import Marked from 'marked';
 const renderer = new Marked.Renderer();
 
 // Heading
-renderer.heading = function (string) {
-  return `[h1]${string}[/h1]`;
+renderer.heading = function (string, level) {
+  if (level > 2) {
+    return `\n[h1]${string}[/h1]\n`;
+  }
+  return `\n[h1][b]${string}[/b][/h1]\n`;
 };
 
 // Italic
@@ -24,7 +27,11 @@ renderer.del = function (string) {
 
 // Paragraph
 renderer.paragraph = function (text) {
-  return text;
+  return `\n${text}\n`;
+};
+
+renderer.br = function () {
+  return '\n';
 };
 
 // Url
@@ -35,9 +42,9 @@ renderer.link = function (href, title, text) {
 // List or Olist
 renderer.list = function (body, ordered) {
   if (ordered) {
-    return `[olist]\n${body}[/olist]`;
+    return `[olist]\n${body}[/olist]\n`;
   }
-  return `[list]\n${body}[/list]`;
+  return `[list]\n${body}[/list]\n`;
 };
 
 // List item
@@ -49,16 +56,24 @@ renderer.listitem = function (string) {
 renderer.blockquote = function (text) {
   const reg = /^\[(.*?)\]/;
   if (reg.test(text)) { // Contain author
-    return `[quote=${RegExp.$1}]${text.replace(reg, '')}[/quote]`;
+    return `[quote=${RegExp.$1}]${text.replace(reg, '')}[/quote]\n`;
   }
-  return `[quote]${text}[/quote]`;
+  return `[quote]${text}[/quote]\n`;
 };
 
 // Code
+renderer.code = function (string) {
+  return `[code]\n${string}\n[/code]\n`;
+};
+
 renderer.codespan = function (string) {
-  return `[code]${string}[/code]`;
+  return `[b][i]${string}[/i][/b]`;
+};
+
+renderer.image = function (href) {
+  return `[img]${href}[/img]`;
 };
 
 module.exports = function (text) {
-  return Marked(text, { renderer });
+  return Marked(text, { renderer, smartypants: false });
 };
